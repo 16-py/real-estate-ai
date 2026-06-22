@@ -33,17 +33,17 @@ def create_poster(image_file, agency, title):
     img = Image.open(image_file).convert("RGBA")
     poster_w, poster_h = 1080, 1350
     
-    # Auto-crop logic
+    # Auto-crop logic using the correct LANCZOS spelling attribute
     img_ratio = img.width / img.height
     poster_ratio = poster_w / poster_h
     if img_ratio > poster_ratio:
         new_width = int(poster_h * img_ratio)
-        img = img.resize((new_width, poster_h), Image.Resampling.LANCEZOS)
+        img = img.resize((new_width, poster_h), Image.Resampling.LANCZOS)
         left = (img.width - poster_w) / 2
         img = img.crop((left, 0, left + poster_w, poster_h))
     else:
         new_height = int(poster_w / img_ratio)
-        img = img.resize((poster_w, new_height), Image.Resampling.LANCEZOS)
+        img = img.resize((poster_w, new_height), Image.Resampling.LANCZOS)
         top = (img.height - poster_h) / 2
         img = img.crop((0, top, poster_w, top + poster_h))
 
@@ -74,9 +74,15 @@ with col2:
         else:
             with st.spinner("Writing elite listing copy..."):
                 try:
+                    # Updated prompt to forcefully demand trending property hashtags
+                    prompt_text = (
+                        f"Write a luxury property listing caption for: {property_details}. "
+                        f"Include agency details: {agency_name}. "
+                        f"At the very end of the text, you MUST include 5-8 trending, high-converting real estate hashtags."
+                    )
                     response = client.models.generate_content(
                         model="gemini-2.5-flash",
-                        contents=f"Write a luxury property listing caption for: {property_details}. Include agency details: {agency_name}"
+                        contents=prompt_text
                     )
                     st.write("**📝 Marketing Masterpiece:**")
                     st.write(response.text)
