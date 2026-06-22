@@ -13,7 +13,7 @@ st.set_page_config(page_title="Apex Real Estate Suite", layout="wide")
 st.title("🏡 APEX // AI Real Estate Suite")
 st.write("Generate high-converting property copy and premium marketing posters simultaneously.")
 
-# Two-column dashboard split
+# Setup clean column layout
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
@@ -50,16 +50,16 @@ def create_poster(image_file, agency, title):
     overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     
-    # Premium Layout Card: Deep navy matte translucent banner across the bottom
+    # Premium Layout Card: Solid banner backdrop across bottom
     draw.rectangle([(0, poster_h - 420), (poster_w, poster_h)], fill=(15, 23, 42, 235))
     
-    # Solid Gold Accent Separation Rule Line
+    # Solid Gold Accent Line
     draw.rectangle([(0, poster_h - 425), (poster_w, poster_h - 420)], fill=(212, 175, 55, 255))
     
     final_img = Image.alpha_composite(base_img, overlay).convert("RGB")
     draw_final = ImageDraw.Draw(final_img)
     
-    # Typography rendering blocks
+    # Clean default system typographic placements
     draw_final.text((540, poster_h - 300), title.upper(), fill=(255, 255, 255), anchor="mm")
     draw_final.text((540, poster_h - 180), "EXCLUSIVELY MARKETED BY:", fill=(212, 175, 55), anchor="mm")
     draw_final.text((540, poster_h - 110), agency.upper(), fill=(255, 255, 255), anchor="mm")
@@ -76,4 +76,35 @@ with col2:
         else:
             with st.spinner("Writing elite listing copy..."):
                 try:
-                    prompt_text = (
+                    # Flat single line concatenation to bypass unclosed parenthesis bugs entirely
+                    prompt_text = "Write a luxury property listing caption for: " + str(property_details) + ". Include agency details: " + str(agency_name) + ". At the very end of the text, include 5-8 trending real estate hashtags."
+                    
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=prompt_text
+                    )
+                    st.write("📝 **Marketing Masterpiece:**")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"AI Generation Error: {str(e)}")
+            
+            if uploaded_file is not None:
+                with st.spinner("Compiling luxury marketing poster..."):
+                    try:
+                        poster = create_poster(uploaded_file, agency_name, property_title)
+                        st.image(poster, caption="Your New Marketing Poster", use_container_width=True)
+                        
+                        buf = io.BytesIO()
+                        poster.save(buf, format="JPEG", quality=95)
+                        byte_im = buf.getvalue()
+                        
+                        st.download_button(
+                            label="📥 Download High-Res Poster",
+                            data=byte_im,
+                            file_name="property_marketing_poster.jpg",
+                            mime="image/jpeg"
+                        )
+                    except Exception as e:
+                        st.error(f"Poster compilation error: {str(e)}")
+            else:
+                st.info("💡 Tip: Upload an image in the left panel to output your visual poster alongside the copy.")
