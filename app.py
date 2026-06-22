@@ -5,7 +5,7 @@ import io
 import urllib.request
 
 # ====================================================================
-# 1. LUXURY DASHBOARD THEMING & CONFIGURATION
+# 1. PREMIUM COHESIVE INTERFACE THEME CONFIGURATION
 # ====================================================================
 st.set_page_config(
     page_title="Apex Global Realty Custom Suite",
@@ -13,18 +13,29 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Deep Luxury Navy & Gold UI Custom Style Injection
+# Deep Target Mockup UI Style Injections
 st.markdown(
     """
     <style>
-        /* Base application background styling */
-        .stApp {
-            background-color: #FDFBF7;
+        /* Force the main application area to a premium ivory off-white */
+        .stApp, [data-testid="stAppViewContainer"] {
+            background-color: #F5F2EB !important;
         }
         
-        /* Main UI tab adjustments */
+        /* Force the sidebar to match the exact rich dark navy tone */
+        [data-testid="stSidebar"], [data-testid="stSidebar"] > div {
+            background-color: #070B13 !important;
+        }
+        
+        /* Sidebar text color adjustments for elite visibility */
+        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+            color: #E2E8F0 !important;
+        }
+        
+        /* Main UI tab configuration switches */
         .stTabs [data-baseweb="tab-list"] {
             gap: 10px;
+            background-color: transparent;
         }
         .stTabs [data-baseweb="tab"] {
             background-color: #0B111E;
@@ -39,7 +50,7 @@ st.markdown(
             font-weight: bold;
         }
         
-        /* Primary premium action buttons button styling */
+        /* Luxury Call-To-Action Primary Buttons */
         div.stButton > button:first-child {
             background-color: #D4AF37;
             color: #0B111E;
@@ -49,6 +60,7 @@ st.markdown(
             border-radius: 4px;
             font-family: 'Georgia', serif;
             letter-spacing: 1px;
+            padding: 12px;
         }
         div.stButton > button:first-child:hover {
             background-color: #B8962E;
@@ -69,11 +81,11 @@ if "generated_copy" not in st.session_state:
 # Corporate Luxury Header Element Block
 st.markdown(
     """
-    <div style="text-align: center; padding: 15px; margin-bottom: 25px; border-bottom: 1px solid #E2E8F0;">
+    <div style="text-align: center; padding: 15px; margin-bottom: 25px; border-bottom: 1px solid #D4AF37;">
         <h1 style="color: #0B111E; font-family: 'Georgia', serif; font-size: 44px; letter-spacing: 3px; margin-bottom: 0px;">
             ⚜️ APEX GLOBAL REALTY
         </h1>
-        <p style="color: #D4AF37; font-family: 'Arial', sans-serif; font-size: 13px; letter-spacing: 5px; text-transform: uppercase; margin-top: 5px;">
+        <p style="color: #B8962E; font-family: 'Arial', sans-serif; font-size: 13px; letter-spacing: 5px; text-transform: uppercase; margin-top: 5px;">
             CUSTOM PROPERTY POSTER CREATOR
         </p>
     </div>
@@ -85,11 +97,11 @@ st.markdown(
 # 2. BRANDING CONTROL PANEL (SIDEBAR)
 # ====================================================================
 with st.sidebar:
-    st.markdown("### 🏢 AGENCY CONFIG")
+    st.markdown("<h3 style='color: #D4AF37; font-family: Georgia;'>🏢 AGENCY CONFIG</h3>", unsafe_allow_html=True)
     agency_name = st.text_input("AGENCY NAME:", value="Apex Global Realty")
     
     st.markdown("---")
-    st.markdown("### 📑 PROPERTY ASSETS")
+    st.markdown("<h3 style='color: #D4AF37; font-family: Georgia;'>📑 PROPERTY ASSETS</h3>", unsafe_allow_html=True)
     property_title = st.text_input("PROPERTY TITLE:", value="YOUR PROPERTY, BEAUTIFULLY PRESENTED")
     property_price = st.text_input("LISTING PRICE / SUBTITLE:", value="EXCLUSIVELY MARKETED BY:")
     
@@ -99,32 +111,30 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.markdown("### 📸 ASSET MANAGER")
+    st.markdown("<h3 style='color: #D4AF37; font-family: Georgia;'>📸 ASSET MANAGER</h3>", unsafe_allow_html=True)
     uploaded_file = st.file_uploader("SELECT IMAGES:", type=["jpg", "jpeg", "png"])
     
     st.markdown("---")
     mode = st.radio("COPY ENGINE WORKSPACE MODE:", ["Offline Workspace", "Live AI Generation"])
 
 # ====================================================================
-# 3. INTERACTIVE MAIN STUDIO SPLIT-LAYOUT (SYNTAX FIXED)
+# 3. INTERACTIVE MAIN STUDIO SPLIT-LAYOUT
 # ====================================================================
 col1, col2 = st.columns([3, 2])
 
 with col1:
-    # Native Clean Containers Avoid String Literal Mismatches Completely
     st.caption("✨ Production Asset Studio Frame")
-    st.markdown("### Review and compile your high-resolution layout frameworks live.")
+    st.markdown("<h3 style='color: #0B111E; font-family: Georgia;'>Review and compile your high-resolution layout frameworks live.</h3>", unsafe_allow_html=True)
     
     tab1, tab2 = st.tabs(["🖼️ Interactive Media Poster", "📝 Formatted Copy Preview"])
     
     with tab1:
         if uploaded_file is not None:
             try:
-                # Load picture and set up standard master aspect scale dimensions
                 base_img = Image.open(uploaded_file).convert("RGBA")
                 poster_w, poster_h = 1200, 1500
                 
-                # Dynamic Center-Crop Matrix Logic
+                # Aspect-ratio preservation cropping logic
                 img_ratio = base_img.width / base_img.height
                 poster_ratio = poster_w / poster_h
                 if img_ratio > poster_ratio:
@@ -138,19 +148,17 @@ with col1:
                     top = (base_img.height - poster_h) / 2
                     base_img = base_img.crop((0, top, poster_w, top + poster_h))
 
-                # Render Translucent Vector Card Overlay
                 overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
                 draw = ImageDraw.Draw(overlay)
                 
-                # Solid Navy Frame Accent Block (Bottom 480px)
+                # Dark Translucent Panel Card Placement (Bottom 480px)
                 draw.rectangle([(0, poster_h - 480), (poster_w, poster_h)], fill=(11, 17, 30, 245))
-                # Solid Metallic Gold Horizon Line Separator Strip
+                # Accent Luxury Gold Separator Strip
                 draw.rectangle([(0, poster_h - 486), (poster_w, poster_h - 480)], fill=(212, 175, 55, 255))
                 
                 final_img = Image.alpha_composite(base_img, overlay).convert("RGB")
                 draw_final = ImageDraw.Draw(final_img)
                 
-                # Fetch High-Res Montserrat Typography Stream directly from Google Fonts
                 try:
                     font_url = "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat-Bold.ttf"
                     font_response = urllib.request.urlopen(font_url)
@@ -170,15 +178,12 @@ with col1:
                 if property_price:
                     draw_final.text((600, poster_h - 280), property_price.upper(), fill=(212, 175, 55), anchor="mm", font=price_font)
                 
-                # Slicing listing detail snippet for safe typographic string fitment
                 snippet = property_details[:130] + "..." if len(property_details) > 130 else property_details
                 draw_final.text((600, poster_h - 185), snippet, fill=(148, 163, 184), anchor="mm", font=label_font)
                 draw_final.text((600, poster_h - 110), agency_name.upper(), fill=(255, 255, 255), anchor="mm", font=agency_font)
                 
-                # Streamlit UI Canvas Core Rendering Image Display Output
                 st.image(final_img, caption="Live Layout Core Preview Matrix", use_container_width=True)
                 
-                # Memory Stream Image Compiler For Raw Export downloads
                 buf = io.BytesIO()
                 final_img.save(buf, format="JPEG", quality=98)
                 
@@ -211,9 +216,8 @@ with col1:
         st.text_area("Active Workspace Output Area:", value=st.session_state["generated_copy"], height=280)
 
 with col2:
-    # Right Column Sidebar Card Info
     with st.container(border=True):
-        st.markdown("### ⚜️ GENERATE CUSTOM POSTER")
+        st.markdown("<h3 style='color: #0B111E; font-family: Georgia;'>⚜️ GENERATE CUSTOM POSTER</h3>", unsafe_allow_html=True)
         st.write("The integrated layout processor captures raw uploaded image files and conforms them into premium 4:5 vertical marketing arrays for distribution across listing networks.")
         st.markdown("---")
         st.markdown("**ACTIVE DESIGN PROFILE:**")
