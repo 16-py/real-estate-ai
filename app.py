@@ -1,7 +1,8 @@
 import streamlit as st
 from google import genai
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 import io
+import urllib.request
 
 # 1. INITIALIZE GEMINI CLIENT SECURELY
 api_key = st.secrets["GEMINI_API_KEY"]
@@ -28,10 +29,12 @@ with col1:
     
     uploaded_file = st.file_uploader("UPLOAD PROPERTY IMAGE:", type=["jpg", "jpeg", "png"])
 
-# 3. HIGH-END POSTER CREATION ENGINE
+# 3. PREMIUM POSTER CREATION ENGINE (With Luxury Typography Download)
 def create_poster(image_file, agency, title):
     base_img = Image.open(image_file).convert("RGBA")
-    poster_w, poster_h = 1080, 1350
+    
+    # Crisper High-Res Dimensions (1200x1500) for sharp text presentation
+    poster_w, poster_h = 1200, 1500
     
     # Aspect Ratio Center-Cropping
     img_ratio = base_img.width / base_img.height
@@ -50,19 +53,35 @@ def create_poster(image_file, agency, title):
     overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     
-    # Premium Layout Card: Solid banner backdrop across bottom
-    draw.rectangle([(0, poster_h - 420), (poster_w, poster_h)], fill=(15, 23, 42, 235))
+    # Premium Layout Card: Dark sleek modern backdrop panel across the bottom
+    draw.rectangle([(0, poster_h - 450), (poster_w, poster_h)], fill=(10, 15, 30, 240))
     
-    # Solid Gold Accent Line
-    draw.rectangle([(0, poster_h - 425), (poster_w, poster_h - 420)], fill=(212, 175, 55, 255))
+    # Luxury Thick Gold Accent Rule Line
+    draw.rectangle([(0, poster_h - 456), (poster_w, poster_h - 450)], fill=(212, 175, 55, 255))
     
     final_img = Image.alpha_composite(base_img, overlay).convert("RGB")
     draw_final = ImageDraw.Draw(final_img)
     
-    # Clean default system typographic placements
-    draw_final.text((540, poster_h - 300), title.upper(), fill=(255, 255, 255), anchor="mm")
-    draw_final.text((540, poster_h - 180), "EXCLUSIVELY MARKETED BY:", fill=(212, 175, 55), anchor="mm")
-    draw_final.text((540, poster_h - 110), agency.upper(), fill=(255, 255, 255), anchor="mm")
+    # Dynamically download a high-end bold font file from Google Fonts during creation
+    try:
+        font_url = "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat-Bold.ttf"
+        font_response = urllib.request.urlopen(font_url)
+        font_data = io.BytesIO(font_response.read())
+        
+        # Define high-end architectural font sizing scales
+        title_font = ImageFont.truetype(font_data, 72)
+        label_font = ImageFont.truetype(font_data, 32)
+        agency_font = ImageFont.truetype(font_data, 48)
+    except:
+        # Emergency backup to system font if network fails
+        title_font = ImageFont.load_default()
+        label_font = ImageFont.load_default()
+        agency_font = ImageFont.load_default()
+    
+    # High-contrast premium typography layout spacing
+    draw_final.text((600, poster_h - 320), title.upper(), fill=(255, 255, 255), anchor="mm", font=title_font)
+    draw_final.text((600, poster_h - 200), "EXCLUSIVELY MARKETED BY:", fill=(212, 175, 55), anchor="mm", font=label_font)
+    draw_final.text((600, poster_h - 120), agency.upper(), fill=(255, 255, 255), anchor="mm", font=agency_font)
     
     return final_img
 
@@ -76,9 +95,7 @@ with col2:
         else:
             with st.spinner("Writing elite listing copy..."):
                 try:
-                    # Flat single line concatenation to bypass unclosed parenthesis bugs entirely
                     prompt_text = "Write a luxury property listing caption for: " + str(property_details) + ". Include agency details: " + str(agency_name) + ". At the very end of the text, include 5-8 trending real estate hashtags."
-                    
                     response = client.models.generate_content(
                         model="gemini-2.5-flash",
                         contents=prompt_text
