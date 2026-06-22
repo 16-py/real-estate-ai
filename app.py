@@ -5,15 +5,19 @@ import io
 import urllib.request
 
 # ====================================================================
-# PREMIUM INTERFACE THEME CONFIGURATION
+# RESTORED PREMIUM INTERFACE
 # ====================================================================
 st.set_page_config(page_title="Apex Global Realty Custom Suite", layout="wide")
 
 st.markdown(
     """
     <style>
+        /* Main Layout Backgrounds */
         .stApp, [data-testid="stAppViewContainer"] { background-color: #F5F2EB !important; }
         [data-testid="stSidebar"], [data-testid="stSidebar"] > div { background-color: #070B13 !important; }
+        
+        /* Ensure all text is readable */
+        .stApp p, .stApp span, .stApp label, .stApp div { color: #0B111E !important; }
         [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label { color: #E2E8F0 !important; }
         
         /* Input Field Highlights */
@@ -57,8 +61,8 @@ with col1:
             base_img = Image.open(uploaded_file).convert("RGBA")
             overlay = Image.new("RGBA", (1200, 1500), (0, 0, 0, 0))
             draw = ImageDraw.Draw(overlay)
-            draw.rectangle([(0, 1020), (1200, 1500)], fill=(11, 17, 30, 245)) # Navy Panel
-            draw.rectangle([(0, 1014), (1200, 1020)], fill=(212, 175, 55, 255)) # Gold Line
+            draw.rectangle([(0, 1020), (1200, 1500)], fill=(11, 17, 30, 245)) 
+            draw.rectangle([(0, 1014), (1200, 1020)], fill=(212, 175, 55, 255))
             
             final_img = Image.alpha_composite(base_img.resize((1200, 1500)), overlay).convert("RGB")
             st.image(final_img, use_container_width=True)
@@ -77,9 +81,9 @@ with col1:
 with col2:
     st.markdown(
         """
-        <div style="border: 1px solid #D4AF37; padding: 20px;">
-            <h3>⚜️ GENERATE CUSTOM POSTER</h3>
-            <p>The integrated layout processor captures raw uploaded image files.</p>
+        <div style="border: 1px solid #D4AF37; padding: 20px; background-color: #F5F2EB;">
+            <h3 style="color: #0B111E !important;">⚜️ GENERATE CUSTOM POSTER</h3>
+            <p style="color: #0B111E !important;">The integrated layout processor captures raw uploaded image files.</p>
         </div>
         """,
         unsafe_allow_html=True
