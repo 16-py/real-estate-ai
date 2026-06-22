@@ -4,7 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 import io
 import urllib.request
 
-# 1. LUXURY DASHBOARD CONFIGURATION
+# 1. LUXURY DASHBOARD CONFIGURATION (Fixes HTML injection crashes)
 st.set_page_config(
     page_title="Apex Real Estate Suite",
     layout="wide",
@@ -81,7 +81,7 @@ with st.container(border=True):
                 st.session_state["generated_copy"] = manual_caption
 
         # Display editable text area block
-        edited_text = st.text_area(label="Active Workspace Copy Block:", value=st.session_state["generated_copy"], height=300)
+        st.text_area(label="Active Workspace Copy Block:", value=st.session_state["generated_copy"], height=300)
 
     with tab2:
         st.markdown("#### 🖨️ Production Asset Composite")
