@@ -1,147 +1,114 @@
-import os
-
-# Clear proxy settings before importing clients that may inspect them.
-os.environ["HTTP_PROXY"] = ""
-os.environ["HTTPS_PROXY"] = ""
-os.environ["http_proxy"] = ""
-os.environ["https_proxy"] = ""
-os.environ["no_proxy"] = "*"
-
 import streamlit as st
-import requests
+from google import genai
+from PIL import Image, ImageDraw
+import io
 
+# 1. INITIALIZE GEMINI CLIENT SECURELY
+api_key = st.secrets["GEMINI_API_KEY"]
+client = genai.Client(api_key=api_key)
 
-def clear_proxy_settings() -> None:
-    """Avoid local proxy settings that can block outbound API calls."""
-    for key in list(os.environ.keys()):
-        if "proxy" in key.lower() and key.lower() != "no_proxy":
-            os.environ.pop(key, None)
-    os.environ["no_proxy"] = "*"
+# 2. INTERFACE VISUAL DESIGN (Modern Luxury Dark Mode Layout)
+st.set_page_config(page_title="Apex Real Estate Suite", layout="wide")
 
-
-def get_api_key() -> str | None:
-    try:
-        if "GEMINI_API_KEY" in st.secrets:
-            return st.secrets["GEMINI_API_KEY"]
-    except FileNotFoundError:
-        pass
-    return os.environ.get("GEMINI_API_KEY")
-
-
-clear_proxy_settings()
-
-st.set_page_config(page_title="Apex Real Estate Automation", layout="centered")
-
-st.markdown(
-    """
+st.markdown("""
     <style>
-    .stApp {
-        background-color: #0B111E;
-        color: #F1F5F9;
-    }
-    h1 {
-        color: #38BDF8 !important;
-        font-family: 'Helvetica Neue', sans-serif;
-        font-weight: 700;
-    }
-    .stTextArea textarea {
-        background-color: #1E293B !important;
-        color: #FFFFFF !important;
-        border: 1px solid #475569 !important;
-        border-radius: 8px;
-    }
-    .stButton button {
-        border-radius: 8px;
-        font-weight: 700;
-    }
+    .stApp { background-color: #0B111E; color: #F1F5F9; }
+    h1, h2, h3 { color: #38BDF8 !important; font-family: 'Helvetica Neue', sans-serif; font-weight: 700; }
+    .stTextArea textarea, .stTextInput input { background-color: #1E293B !important; color: #FFFFFF !important; border: 1px solid #475569 !important; border-radius: 8px; }
+    div[data-testid="stFileUploader"] { background-color: #1E293B; border: 2px dashed #475569; border-radius: 8px; padding: 15px; }
     </style>
-    """,
-    unsafe_allow_html=True,
-)
+""", unsafe_with_html=True)
 
-st.title("APEX // AI Real Estate Suite")
-st.write(
-    "Convert raw property criteria into polished, high-converting international marketing copy."
-)
+st.title("🏡 APEX // AI Real Estate & Poster Suite")
+st.write("Generate elite property descriptions and custom marketing posters simultaneously.")
 
-property_details = st.text_area(
-    "PROPERTY SPECIFICATIONS:",
-    placeholder=(
-        "e.g., 3-bedroom penthouse in London, private balcony, marble countertops, "
-        "5 mins from transit..."
-    ),
-)
+# Setup an elegant two-column dashboard split
+col1, col2 = st.columns([1, 1], gap="large")
 
-if st.button("Generate Premium Marketing Copy", type="primary"):
-    api_key = get_api_key()
+with col1:
+    st.subheader("📋 Input Details")
+    agency_name = st.text_input("AGENCY NAME:", placeholder="e.g., APEX GLOBAL REALTY")
+    property_title = st.text_input("PROPERTY SHORT TITLE:", placeholder="e.g., LUXURY PENTHOUSE")
+    
+    property_details = st.text_area(
+        "PROPERTY SPECIFICATIONS:", 
+        placeholder="e.g., 3-bedroom penthouse in London, private balcony, marble countertops..."
+    )
+    
+    uploaded_file = st.file_uploader("UPLOAD PROPERTY IMAGE:", type=["jpg", "jpeg", "png"])
 
-    if not property_details.strip():
-        st.error("Please provide property data before generating copy.")
-    elif not api_key:
-        st.error(
-            "Missing Gemini API key. Add GEMINI_API_KEY to your environment or "
-            "Streamlit secrets."
-        )
+# 3. POSTER CREATION ENGINE (Using Pillow)
+def create_poster(image_file, agency, title):
+    img = Image.open(image_file).convert("RGBA")
+    poster_w, poster_h = 1080, 1350
+    
+    # Auto-crop logic
+    img_ratio = img.width / img.height
+    poster_ratio = poster_w / poster_h
+    if img_ratio > poster_ratio:
+        new_width = int(poster_h * img_ratio)
+        img = img.resize((new_width, poster_h), Image.Resampling.LANCEZOS)
+        left = (img.width - poster_w) / 2
+        img = img.crop((left, 0, left + poster_w, poster_h))
     else:
-        with st.spinner("Analyzing property details and generating copy..."):
-            try:
-                url = (
-                    "https://generativelanguage.googleapis.com/v1beta/models/"
-                    f"gemini-2.5-flash:generateContent?key={api_key}"
-                )
-                payload = {
-                    "contents": [
-                        {
-                            "parts": [
-                                {
-                                    "text": (
-                                        "Write a luxury property listing caption for: "
-                                        f"{property_details.strip()}"
-                                    )
-                                }
-                            ]
-                        }
-                    ],
-                    "systemInstruction": {
-                        "parts": [
-                            {
-                                "text": (
-                                    "You are an elite real estate copywriter for premium agencies "
-                                    "in the US and UK. Take raw property specs and structure them "
-                                    "into a high-end social media listing. Include an attention-"
-                                    "grabbing hook sentence, a clean bulleted list of features, "
-                                    "a call to action to book viewings, and professional hashtags. "
-                                    "Do not use filler talk."
-                                )
-                            }
-                        ]
-                    },
-                }
+        new_height = int(poster_w / img_ratio)
+        img = img.resize((poster_w, new_height), Image.Resampling.LANCEZOS)
+        top = (img.height - poster_h) / 2
+        img = img.crop((0, top, poster_w, top + poster_h))
 
-                session = requests.Session()
-                session.trust_env = False
-                response = session.post(
-                    url,
-                    json=payload,
-                    proxies={"http": None, "https": None},
-                    timeout=60,
-                )
+    overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    
+    # Bottom layout bars
+    draw.rectangle([(0, poster_h - 380), (poster_w, poster_h)], fill=(11, 17, 30, 230))
+    draw.rectangle([(0, poster_h - 385), (poster_w, poster_h - 380)], fill=(212, 175, 55, 255))
+    
+    final_img = Image.alpha_composite(img, overlay).convert("RGB")
+    draw_final = ImageDraw.Draw(final_img)
+    
+    # Typography rendering (System default)
+    draw_final.text((540, poster_h - 260), title.upper(), fill=(255, 255, 255), anchor="mm")
+    draw_final.text((540, poster_h - 150), "EXCLUSIVELY MARKETED BY:", fill=(212, 175, 55), anchor="mm")
+    draw_final.text((540, poster_h - 90), agency.upper(), fill=(255, 255, 255), anchor="mm")
+    
+    return final_img
 
-                if response.status_code == 200:
-                    response_data = response.json()
-                    output_text = response_data["candidates"][0]["content"]["parts"][0][
-                        "text"
-                    ]
-                    st.subheader("Generated Marketing Copy")
-                    st.write(output_text)
-                else:
-                    st.error(
-                        f"Google API returned an error ({response.status_code}): "
-                        f"{response.text}"
+# 4. CAPTION & VISUAL GENERATION PROTOCOLS
+with col2:
+    st.subheader("✨ Generated Output")
+    
+    if st.button("Generate Marketing Assets", type="primary"):
+        if not property_details or not agency_name or not property_title:
+            st.error("Error: Please fill in all text input fields first.")
+        else:
+            with st.spinner("Writing elite listing copy..."):
+                try:
+                    response = client.models.generate_content(
+                        model="gemini-2.5-flash",
+                        contents=f"Write a luxury property listing caption for: {property_details}. Include agency details: {agency_name}"
                     )
-            except Exception as exc:
-                st.error(f"Network processing failed: {exc}")
-                st.info(
-                    "Tip: If you are using a VPN, try toggling it and running the "
-                    "request again."
-                )
+                    st.write("**📝 Marketing Masterpiece:**")
+                    st.write(response.text)
+                except Exception as e:
+                    st.error(f"AI Generation Error: {str(e)}")
+            
+            if uploaded_file is not None:
+                with st.spinner("Compiling luxury marketing poster..."):
+                    try:
+                        poster = create_poster(uploaded_file, agency_name, property_title)
+                        st.image(poster, caption="Your Custom Marketing Poster", use_container_width=True)
+                        
+                        buf = io.BytesIO()
+                        poster.save(buf, format="JPEG", quality=95)
+                        byte_im = buf.getvalue()
+                        
+                        st.download_button(
+                            label="📥 Download High-Res Poster",
+                            data=byte_im,
+                            file_name="property_marketing_poster.jpg",
+                            mime="image/jpeg"
+                        )
+                    except Exception as e:
+                        st.error(f"Poster compilation error: {str(e)}")
+            else:
+                st.info("💡 Tip: Upload an image in the left panel to output your visual poster alongside the copy.")
