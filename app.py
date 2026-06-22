@@ -9,93 +9,83 @@ import urllib.request
 # ====================================================================
 THEMES = {
     "PREMIUM NAVY / GOLD": {
-        "sidebar_bg": "#070B13",
-        "accent": "#D4AF37",
-        "bg": "#F5F2EB",
-        "text": "#0B111E",
-        "rect_fill": (11, 17, 30, 245),
-        "accent_fill": (212, 175, 55, 255)
+        "sidebar_bg": "#070B13", "accent": "#D4AF37", "bg": "#F5F2EB", "text": "#0B111E",
+        "rect_fill": (11, 17, 30, 245), "accent_fill": (212, 175, 55, 255)
     },
     "MINIMAL BLACK / WHITE": {
-        "sidebar_bg": "#1A1A1A",
-        "accent": "#FFFFFF",
-        "bg": "#FFFFFF",
-        "text": "#000000",
-        "rect_fill": (0, 0, 0, 240),
-        "accent_fill": (255, 255, 255, 255)
+        "sidebar_bg": "#1A1A1A", "accent": "#FFFFFF", "bg": "#FFFFFF", "text": "#000000",
+        "rect_fill": (0, 0, 0, 240), "accent_fill": (255, 255, 255, 255)
     },
     "FOREST GREEN / CREAM": {
-        "sidebar_bg": "#0B1D15",
-        "accent": "#C5A059",
-        "bg": "#FDFBF7",
-        "text": "#0B111E",
-        "rect_fill": (11, 29, 21, 240),
-        "accent_fill": (197, 160, 89, 255)
+        "sidebar_bg": "#0B1D15", "accent": "#C5A059", "bg": "#FDFBF7", "text": "#0B111E",
+        "rect_fill": (11, 29, 21, 240), "accent_fill": (197, 160, 89, 255)
     }
 }
 
-if "theme" not in st.session_state:
-    st.session_state["theme"] = "PREMIUM NAVY / GOLD"
+if "theme" not in st.session_state: st.session_state["theme"] = "PREMIUM NAVY / GOLD"
+if "generated_copy" not in st.session_state: st.session_state["generated_copy"] = ""
 
-# ====================================================================
-# 2. INTERFACE CONFIGURATION
-# ====================================================================
-st.set_page_config(page_title="Apex Global Realty Custom Suite", layout="wide")
 t = THEMES[st.session_state["theme"]]
 
-st.markdown(
-    f"""
+# ====================================================================
+# 2. INTERFACE & CSS
+# ====================================================================
+st.set_page_config(page_title="Apex Global Realty Custom Suite", layout="wide")
+st.markdown(f"""
     <style>
-        .stApp, [data-testid="stAppViewContainer"] {{ background-color: {t['bg']} !important; }}
-        [data-testid="stSidebar"], [data-testid="stSidebar"] > div {{ background-color: {t['sidebar_bg']} !important; }}
-        [data-testid="stSidebar"] p, [data-testid="stSidebar"] span {{ color: #E2E8F0 !important; }}
-        
-        /* Highlighting for inputs */
-        div[data-baseweb="input"]:focus-within {{ border: 2px solid {t['accent']} !important; }}
-        
-        .stTabs [aria-selected="true"] {{ background-color: {t['accent']} !important; color: {t['text']} !important; }}
+        .stApp { background-color: {t['bg']} !important; }
+        [data-testid="stSidebar"] { background-color: {t['sidebar_bg']} !important; }
+        div[data-baseweb="select"] {{ border: 1px solid {t['accent']} !important; }}
     </style>
-    """,
-    unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 # ====================================================================
-# 3. SIDEBAR & THEME SWITCHER
+# 3. SIDEBAR CONFIGURATION
 # ====================================================================
 with st.sidebar:
-    st.markdown("<h3 style='color: #D4AF37;'>🏢 AGENCY CONFIG</h3>", unsafe_allow_html=True)
+    st.markdown(f"<h3 style='color: {t['accent']}'>🏢 AGENCY CONFIG</h3>", unsafe_allow_html=True)
     st.session_state["theme"] = st.selectbox("SELECT DESIGN PROFILE:", list(THEMES.keys()))
     agency_name = st.text_input("AGENCY NAME:", value="Apex Global Realty")
-    # ... (other inputs remain the same)
     property_title = st.text_input("PROPERTY TITLE:", value="YOUR PROPERTY")
     property_details = st.text_area("DETAILS:", value="Stunning views.")
     uploaded_file = st.file_uploader("SELECT IMAGE:", type=["jpg", "png"])
+    mode = st.radio("WORK MODE:", ["Manual", "AI Generation"])
 
 # ====================================================================
-# 4. MAIN STUDIO (USING DYNAMIC THEME)
+# 4. MAIN STUDIO LAYOUT
 # ====================================================================
 col1, col2 = st.columns([3, 2])
 
 with col1:
-    if uploaded_file:
-        base_img = Image.open(uploaded_file).convert("RGBA")
-        # Image creation logic uses dynamic theme fills:
-        overlay = Image.new("RGBA", (1200, 1500), (0, 0, 0, 0))
-        draw = ImageDraw.Draw(overlay)
-        draw.rectangle([(0, 1020), (1200, 1500)], fill=t['rect_fill'])
-        draw.rectangle([(0, 1014), (1200, 1020)], fill=t['accent_fill'])
-        # ... (rest of image drawing)
+    tab1, tab2 = st.tabs(["🖼️ Interactive Media Poster", "📝 Copy Generator"])
+    
+    with tab1:
+        if uploaded_file:
+            base_img = Image.open(uploaded_file).convert("RGBA")
+            # Create Poster Logic
+            overlay = Image.new("RGBA", (1200, 1500), (0, 0, 0, 0))
+            draw = ImageDraw.Draw(overlay)
+            draw.rectangle([(0, 1020), (1200, 1500)], fill=t['rect_fill'])
+            draw.rectangle([(0, 1014), (1200, 1020)], fill=t['accent_fill'])
+            
+            final_img = Image.alpha_composite(base_img.resize((1200, 1500)), overlay).convert("RGB")
+            st.image(final_img, use_container_width=True)
+            
+            buf = io.BytesIO()
+            final_img.save(buf, format="JPEG")
+            st.download_button("DOWNLOAD POSTER", data=buf.getvalue(), file_name="poster.jpg")
+        else:
+            st.info("Upload an image to start rendering.")
+
+    with tab2:
+        if st.button("RUN GENERATION"):
+            st.session_state["generated_copy"] = f"Luxury listing for: {property_details}"
+        st.text_area("Copy:", value=st.session_state["generated_copy"])
 
 with col2:
-    st.markdown(
-        f"""
-        <div style="background-color: {t['bg']}; padding: 20px; border: 1px solid {t['accent']}; color: {t['text']};">
-            <h3 style="color: {t['text']};">⚜️ GENERATE CUSTOM POSTER</h3>
-            <p>Integrated layout processor for {st.session_state['theme']}.</p>
-            <div style="background-color: {t['accent']}; color: {t['text']}; padding: 10px; text-align: center;">
-                {st.session_state['theme']}
-            </div>
+    st.markdown(f"""
+        <div style="border: 1px solid {t['accent']}; padding: 20px;">
+            <h3>⚜️ GENERATE CUSTOM POSTER</h3>
+            <p>Active Profile: {st.session_state['theme']}</p>
         </div>
-        """,
-        unsafe_allow_html=True
-    )
+    """, unsafe_allow_html=True)
