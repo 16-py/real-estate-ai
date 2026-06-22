@@ -7,17 +7,8 @@ import io
 api_key = st.secrets["GEMINI_API_KEY"]
 client = genai.Client(api_key=api_key)
 
-# 2. INTERFACE VISUAL DESIGN (Modern Luxury Dark Mode Layout)
+# 2. INTERFACE VISUAL DESIGN (Clean Layout - No Markdown Hacks)
 st.set_page_config(page_title="Apex Real Estate Suite", layout="wide")
-
-st.markdown("""
-    <style>
-    .stApp { background-color: #0B111E; color: #F1F5F9; }
-    h1, h2, h3 { color: #38BDF8 !important; font-family: 'Helvetica Neue', sans-serif; font-weight: 700; }
-    .stTextArea textarea, .stTextInput input { background-color: #1E293B !important; color: #FFFFFF !important; border: 1px solid #475569 !important; border-radius: 8px; }
-    div[data-testid="stFileUploader"] { background-color: #1E293B; border: 2px dashed #475569; border-radius: 8px; padding: 15px; }
-    </style>
-""", unsafe_with_html=True)
 
 st.title("🏡 APEX // AI Real Estate & Poster Suite")
 st.write("Generate elite property descriptions and custom marketing posters simultaneously.")
@@ -59,7 +50,7 @@ def create_poster(image_file, agency, title):
     overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     
-    # Bottom layout bars
+    # Bottom layout bars (Dark blue and gold strip)
     draw.rectangle([(0, poster_h - 380), (poster_w, poster_h)], fill=(11, 17, 30, 230))
     draw.rectangle([(0, poster_h - 385), (poster_w, poster_h - 380)], fill=(212, 175, 55, 255))
     
