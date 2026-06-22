@@ -1,125 +1,124 @@
 import streamlit as st
 from google import genai
-from PIL import Image, ImageDraw, ImageFont
-import io
-import urllib.request
+import base64
 
-# 1. INITIALIZE GEMINI CLIENT SECURELY
+# 1. INITIALIZE GEMINI CLIENT
 api_key = st.secrets["GEMINI_API_KEY"]
 client = genai.Client(api_key=api_key)
 
-# 2. INTERFACE VISUAL DESIGN
 st.set_page_config(page_title="Apex Real Estate Suite", layout="wide")
 
-st.title("🏡 APEX // AI Real Estate Suite")
-st.write("Generate high-converting property copy and premium marketing posters simultaneously.")
+# Inject premium Montserrat Google font directly into the web interface
+st.markdown("""
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;700;800&display=swap">
+    <style>
+    .stApp { background-color: #0F172A; color: #F8FAFC; font-family: 'Montserrat', sans-serif; }
+    h1 { font-weight: 800; color: #38BDF8 !important; }
+    h3 { font-weight: 700; color: #F1F5F9 !important; }
+    div[data-testid="stFileUploader"] { background-color: #1E293B; border: 2px dashed #475569; border-radius: 12px; }
+    .stButton>button { background: linear-gradient(135deg, #D4AF37 0%, #AA7C11 100%) !important; color: white !important; font-weight: 700; border: none !important; border-radius: 8px; padding: 12px 24px; }
+    </style>
+""", unsafe_with_html=True)
 
-# Setup clean column layout
+st.title("🏡 APEX // AI Elite Real Estate Suite")
+st.write("Generate modern, magazine-grade marketing visuals and copy in real-time.")
+
 col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.subheader("📋 Input Details")
+    st.subheader("📋 Property Assets & Details")
     agency_name = st.text_input("AGENCY NAME:", placeholder="e.g., AYAN AN ALI AGENCY")
-    property_title = st.text_input("PROPERTY TITLE:", placeholder="e.g., LUXURY PENTHOUSE")
+    property_title = st.text_input("PROPERTY TITLE:", placeholder="e.g., THE LUXURY PENTHOUSE")
+    property_price = st.text_input("LISTING PRICE:", placeholder="e.g., $4,250,000")
     
     property_details = st.text_area(
-        "PROPERTY SPECIFICATIONS:", 
-        placeholder="e.g., 3-bedroom penthouse in London, private balcony, marble countertops..."
+        "RAW SPECIFICATIONS:", 
+        placeholder="e.g., 3 bedrooms, floor-to-ceiling panoramic glass windows, private infinity terrace, premium marble finishings..."
     )
     
-    uploaded_file = st.file_uploader("UPLOAD PROPERTY IMAGE:", type=["jpg", "jpeg", "png"])
+    uploaded_file = st.file_uploader("UPLOAD HIGH-RES PHOTO:", type=["jpg", "jpeg", "png"])
 
-# 3. PREMIUM POSTER CREATION ENGINE
-def create_poster(image_file, agency, title):
-    base_img = Image.open(image_file).convert("RGBA")
-    
-    # 1200x1500 layout canvas
-    poster_w, poster_h = 1200, 1500
-    
-    # Aspect Ratio Center-Cropping
-    img_ratio = base_img.width / base_img.height
-    poster_ratio = poster_w / poster_h
-    if img_ratio > poster_ratio:
-        new_width = int(poster_h * img_ratio)
-        base_img = base_img.resize((new_width, poster_h), Image.Resampling.LANCZOS)
-        left = (base_img.width - poster_w) / 2
-        base_img = base_img.crop((left, 0, left + poster_w, poster_h))
-    else:
-        new_height = int(poster_w / img_ratio)
-        base_img = base_img.resize((poster_w, new_height), Image.Resampling.LANCZOS)
-        top = (base_img.height - poster_h) / 2
-        base_img = base_img.crop((0, top, poster_w, top + poster_h))
-
-    overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(overlay)
-    
-    # Bottom layout card panel
-    draw.rectangle([(0, poster_h - 450), (poster_w, poster_h)], fill=(10, 15, 30, 240))
-    
-    # Gold Border Line
-    draw.rectangle([(0, poster_h - 456), (poster_w, poster_h - 450)], fill=(212, 175, 55, 255))
-    
-    final_img = Image.alpha_composite(base_img, overlay).convert("RGB")
-    draw_final = ImageDraw.Draw(final_img)
-    
-    # Pull luxury font dynamically from web package
-    try:
-        font_url = "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat-Bold.ttf"
-        font_response = urllib.request.urlopen(font_url)
-        font_data = io.BytesIO(font_response.read())
-        
-        title_font = ImageFont.truetype(font_data, 72)
-        label_font = ImageFont.truetype(font_data, 32)
-        agency_font = ImageFont.truetype(font_data, 48)
-    except:
-        title_font = ImageFont.load_default()
-        label_font = ImageFont.load_default()
-        agency_font = ImageFont.load_default()
-    
-    # Spaced typographic placement
-    draw_final.text((600, poster_h - 320), title.upper(), fill=(255, 255, 255), anchor="mm", font=title_font)
-    draw_final.text((600, poster_h - 200), "EXCLUSIVELY MARKETED BY:", fill=(212, 175, 55), anchor="mm", font=label_font)
-    draw_final.text((600, poster_h - 120), agency.upper(), fill=(255, 255, 255), anchor="mm", font=agency_font)
-    
-    return final_img
-
-# 4. CAPTION & VISUAL GENERATION PROTOCOLS
 with col2:
-    st.subheader("✨ Generated Output")
+    st.subheader("✨ Premium Finished Output")
     
-    if st.button("Generate Professional Package", type="primary"):
+    if st.button("Generate Elite Marketing Package", type="primary"):
         if not property_details or not agency_name or not property_title:
-            st.error("Error: Please fill in all text input fields first.")
+            st.error("Error: Please provide all text configuration fields in the left column.")
         else:
-            with st.spinner("Writing elite listing copy..."):
+            # Step A: Generate Elite Ad Copy
+            with st.spinner("AI Copywriter crafting luxury pitch..."):
                 try:
-                    prompt_text = "Write a luxury property listing caption for: " + str(property_details) + ". Include agency details: " + str(agency_name) + ". At the very end of the text, include 5-8 trending real estate hashtags."
+                    prompt_text = f"Write an ultra-luxury real estate listing caption for: {property_details}. Highlight the prestige. Agency: {agency_name}. End with 5 trending high-converting real estate hashtags."
                     response = client.models.generate_content(
                         model="gemini-2.5-flash",
                         contents=prompt_text
                     )
-                    st.write("📝 **Marketing Masterpiece:**")
+                    st.write("### 📝 Luxury Listing Copy")
                     st.write(response.text)
+                    st.markdown("---")
                 except Exception as e:
                     st.error(f"AI Generation Error: {str(e)}")
             
+            # Step B: Render Professional Poster Layout via Clean HTML/CSS Canvas
             if uploaded_file is not None:
-                with st.spinner("Compiling luxury marketing poster..."):
+                with st.spinner("Compiling luxury digital poster..."):
                     try:
-                        poster = create_poster(uploaded_file, agency_name, property_title)
-                        st.image(poster, caption="Your New Marketing Poster", use_container_width=True)
+                        # Convert image data safely to Base64 to inject directly into the HTML graphic layout
+                        bytes_data = uploaded_file.getvalue()
+                        encoded_img = base64.b64encode(bytes_data).decode("utf-8")
+                        img_type = uploaded_file.type
+                        img_data_url = f"data:{img_type};base64,{encoded_img}"
                         
-                        buf = io.BytesIO()
-                        poster.save(buf, format="JPEG", quality=95)
-                        byte_im = buf.getvalue()
+                        # High-End Design Frame (Clean typography, edge-to-edge bleed, frosted dark contrast cards)
+                        poster_html = f"""
+                        <div style="
+                            width: 100%;
+                            max-width: 550px;
+                            height: 680px;
+                            border-radius: 20px;
+                            background-image: url('{img_data_url}');
+                            background-size: cover;
+                            background-position: center;
+                            position: relative;
+                            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+                            font-family: 'Montserrat', sans-serif;
+                            overflow: hidden;
+                            margin: 20px auto;
+                            border: 1px solid rgba(255, 255, 255, 0.1);
+                        ">
+                            <div style="position: absolute; top:0; left:0; width:100%; height:150px; background: linear-gradient(to bottom, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 100%); z-index: 1;"></div>
+                            
+                            <div style="
+                                position: absolute;
+                                bottom: 0;
+                                left: 0;
+                                width: 100%;
+                                background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.85) 75%, rgba(15, 23, 42, 0) 100%);
+                                padding: 60px 30px 40px 30px;
+                                box-sizing: border-box;
+                                z-index: 2;
+                                display: flex;
+                                flex-direction: column;
+                                justify-content: flex-end;
+                            ">
+                                <div style="width: 60px; height: 4px; background: linear-gradient(90deg, #D4AF37, #F3E5AB); margin-bottom: 20px; border-radius: 2px;"></div>
+                                
+                                <h2 style="color: #FFFFFF; font-size: 28px; font-weight: 800; text-transform: uppercase; margin: 0 0 8px 0; letter-spacing: 1.5px; line-height: 1.2; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">{property_title}</h2>
+                                
+                                <div style="color: #D4AF37; font-size: 24px; font-weight: 700; margin-bottom: 30px; letter-spacing: 1px;">{property_price}</div>
+                                
+                                <div style="width: 100%; height: 1px; background: rgba(255,255,255,0.1); margin-bottom: 20px;"></div>
+                                
+                                <div style="font-size: 11px; color: #94A3B8; font-weight: 400; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px;">Exclusively Marketed By</div>
+                                <div style="font-size: 18px; color: #FFFFFF; font-weight: 700; text-transform: uppercase; letter-spacing: 2px;">{agency_name}</div>
+                            </div>
+                        </div>
+                        """
                         
-                        st.download_button(
-                            label="📥 Download High-Res Poster",
-                            data=byte_im,
-                            file_name="property_marketing_poster.jpg",
-                            mime="image/jpeg"
-                        )
+                        st.write("### 🖼️ Professional Digital Asset")
+                        st.markdown(poster_html, unsafe_with_html=True)
+                        st.caption("✨ Tip: To save this high-resolution visual layout to your device instantly, right-click inside the image card frame and select 'Save Image As' or take a quick crisp screenshot for Instagram Stories.")
                     except Exception as e:
-                        st.error(f"Poster compilation error: {str(e)}")
+                        st.error(f"Visual asset generation failed: {str(e)}")
             else:
-                st.info("💡 Tip: Upload an image in the left panel to output your visual poster alongside the copy.")
+                st.info("💡 To view the premium visual asset layout, upload a high-resolution property photograph in the left input panel.")
