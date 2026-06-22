@@ -82,11 +82,36 @@ st.markdown(
 )
 
 # ====================================================================
-# 2. BRANDING CONTROL PANEL (SIDEBAR)
+# 2. BRANDING CONTROL PANEL (SIDEBAR) - FIXED SYNTAX IMMUNE FORMAT
 # ====================================================================
 with st.sidebar:
-    st.markdown("<h2 style='color: #D4AF37; font-family: Georgia; font-size: 22px; margin-bottom: 0px;'>🏢 AGENCY CONFIG</h2>", unsafe_allow_html=True)
-    st.markdown("<p style='color: #94A3B8; font-size: 12px; margin-top: 0px;'>Set up corporate branding metadata</p>", unsafe_allow_html=True)
+    st.markdown("### 🏢 AGENCY CONFIG")
     agency_name = st.text_input("AGENCY NAME:", value="Apex Global Realty")
     
-    st.markdown("<br
+    st.markdown("---")
+    st.markdown("### 📑 PROPERTY ASSETS")
+    property_title = st.text_input("PROPERTY TITLE:", value="YOUR PROPERTY, BEAUTIFULLY PRESENTED")
+    property_price = st.text_input("LISTING PRICE / SUBTITLE:", value="EXCLUSIVELY MARKETED BY:")
+    
+    property_details = st.text_area(
+        "PROPERTY DETAILS:",
+        value="Panoramic ocean views from this modern Architectural Masterpiece, with gorgeous green sanctuaries, modern interiors, and beautifully presented layout structures."
+    )
+    
+    st.markdown("---")
+    st.markdown("### 📸 ASSET MANAGER")
+    uploaded_file = st.file_uploader("SELECT IMAGES:", type=["jpg", "jpeg", "png"])
+    
+    st.markdown("---")
+    mode = st.radio("COPY ENGINE WORKSPACE MODE:", ["Offline Workspace", "Live AI Generation"])
+
+# ====================================================================
+# 3. INTERACTIVE MAIN STUDIO SPLIT-LAYOUT
+# ====================================================================
+col1, col2 = st.columns([3, 2])
+
+with col1:
+    # Stylized Canvas Context Tag
+    st.markdown(
+        """
+        <div style="border-left: 4px solid #D4AF37; padding-left: 15px; margin-
