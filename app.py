@@ -197,5 +197,52 @@ with col1:
                     label_font = ImageFont.load_default()
                     agency_font = ImageFont.load_default()
                 
-                # Render Center-Aligned Type Strings
-                draw_final.text((600,
+                # Render Center-Aligned Type Strings (Parenthesis Matrix Fixed)
+                draw_final.text((600, poster_h - 370), property_title.upper(), fill=(255, 255, 255), anchor="mm", font=title_font)
+                if property_price:
+                    draw_final.text((600, poster_h - 280), property_price.upper(), fill=(212, 175, 55), anchor="mm", font=price_font)
+                
+                snippet = property_details[:130] + "..." if len(property_details) > 130 else property_details
+                draw_final.text((600, poster_h - 185), snippet, fill=(148, 163, 184), anchor="mm", font=label_font)
+                draw_final.text((600, poster_h - 110), agency_name.upper(), fill=(255, 255, 255), anchor="mm", font=agency_font)
+                
+                st.image(final_img, caption="Live Layout Core Preview Matrix", use_container_width=True)
+                
+                buf = io.BytesIO()
+                final_img.save(buf, format="JPEG", quality=98)
+                
+                st.download_button(
+                    label="⚜️ DOWNLOAD MASTER HIGH-RES JPG ASSET",
+                    data=buf.getvalue(),
+                    file_name="apex_luxury_poster.jpg",
+                    mime="image/jpeg",
+                    use_container_width=True
+                )
+            except Exception as render_err:
+                st.error(f"Render System Notice: {str(render_err)}")
+        else:
+            st.info("💡 Asset Manager Standby. Drop a high-resolution photo in the sidebar to see it render.")
+
+    with tab2:
+        st.markdown("#### 📄 Description Workspace Copy Block")
+        if st.button("RUN TEXT ENGINE GENERATION", type="primary"):
+            if mode == "Live AI Generation" and client:
+                with st.spinner("Compiling copy framework..."):
+                    try:
+                        prompt_text = f"Write an ultra-luxury real estate listing description for: {property_details}. Agency: {agency_name}."
+                        response = client.models.generate_content(model="gemini-2.5-flash", contents=prompt_text)
+                        st.session_state["generated_copy"] = response.text
+                    except Exception as e:
+                        st.error(f"AI text model failed: {str(e)}")
+            else:
+                st.session_state["generated_copy"] = property_details
+                
+        st.text_area("Active Workspace Output Area:", value=st.session_state["generated_copy"], height=280)
+
+with col2:
+    with st.container(border=True):
+        st.markdown("<h3 style='color: #0B111E; font-family: Georgia;'>⚜️ GENERATE CUSTOM POSTER</h3>", unsafe_allow_html=True)
+        st.write("The integrated layout processor captures raw uploaded image files and conforms them into premium 4:5 vertical marketing arrays for distribution across listing networks.")
+        st.markdown("---")
+        st.markdown("**ACTIVE DESIGN PROFILE:**")
+        st.info("PREMIUM NAVY / GOLD CORPORATE")
