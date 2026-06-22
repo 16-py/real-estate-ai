@@ -8,7 +8,7 @@ import urllib.request
 api_key = st.secrets["GEMINI_API_KEY"]
 client = genai.Client(api_key=api_key)
 
-# 2. INTERFACE VISUAL DESIGN (Clean Layout - Safe for Python 3.14)
+# 2. INTERFACE VISUAL DESIGN (Pure Streamlit UI - No Markdown CSS Hacks)
 st.set_page_config(page_title="Apex Real Estate Suite", layout="wide")
 
 st.title("🏡 APEX // AI Real Estate Suite")
@@ -92,4 +92,16 @@ def create_poster(image_file, agency, title, price):
     
     return final_img
 
-# 4. CAPTION & VISUAL GENERATION PROTOCO
+# 4. CAPTION & VISUAL GENERATION PROTOCOLS
+with col2:
+    st.subheader("✨ Generated Output")
+    
+    # This button will now display perfectly because the layout code is standard-compliant
+    if st.button("Generate Professional Package", type="primary"):
+        if not property_details or not agency_name or not property_title:
+            st.error("Error: Please fill in all text input fields first.")
+        else:
+            with st.spinner("Writing elite listing copy..."):
+                try:
+                    prompt_text = "Write a luxury property listing caption for: " + str(property_details) + ". Include agency details: " + str(agency_name) + ". At the very end of the text, include 5-8 trending real estate hashtags."
+                    response
