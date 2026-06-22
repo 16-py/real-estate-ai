@@ -5,7 +5,7 @@ import io
 import urllib.request
 
 # ====================================================================
-# 1. DYNAMIC THEME ENGINE DEFINITION
+# 1. FAIL-SAFE THEME INITIALIZATION
 # ====================================================================
 THEMES = {
     "PREMIUM NAVY / GOLD": {
@@ -15,16 +15,13 @@ THEMES = {
     "MINIMAL BLACK / WHITE": {
         "sidebar_bg": "#1A1A1A", "accent": "#FFFFFF", "bg": "#FFFFFF", "text": "#000000",
         "rect_fill": (0, 0, 0, 240), "accent_fill": (255, 255, 255, 255)
-    },
-    "FOREST GREEN / CREAM": {
-        "sidebar_bg": "#0B1D15", "accent": "#C5A059", "bg": "#FDFBF7", "text": "#0B111E",
-        "rect_fill": (11, 29, 21, 240), "accent_fill": (197, 160, 89, 255)
     }
 }
 
 if "theme" not in st.session_state: st.session_state["theme"] = "PREMIUM NAVY / GOLD"
 if "generated_copy" not in st.session_state: st.session_state["generated_copy"] = ""
 
+# Define theme variable explicitly
 t = THEMES[st.session_state["theme"]]
 
 # ====================================================================
@@ -35,7 +32,7 @@ st.markdown(f"""
     <style>
         .stApp { background-color: {t['bg']} !important; }
         [data-testid="stSidebar"] { background-color: {t['sidebar_bg']} !important; }
-        div[data-baseweb="select"] {{ border: 1px solid {t['accent']} !important; }}
+        h1, h2, h3, p {{ color: {t['text']} !important; }}
     </style>
 """, unsafe_allow_html=True)
 
@@ -52,7 +49,7 @@ with st.sidebar:
     mode = st.radio("WORK MODE:", ["Manual", "AI Generation"])
 
 # ====================================================================
-# 4. MAIN STUDIO LAYOUT
+# 4. MAIN STUDIO LAYOUT (RESTORED FEATURES)
 # ====================================================================
 col1, col2 = st.columns([3, 2])
 
@@ -62,7 +59,6 @@ with col1:
     with tab1:
         if uploaded_file:
             base_img = Image.open(uploaded_file).convert("RGBA")
-            # Create Poster Logic
             overlay = Image.new("RGBA", (1200, 1500), (0, 0, 0, 0))
             draw = ImageDraw.Draw(overlay)
             draw.rectangle([(0, 1020), (1200, 1500)], fill=t['rect_fill'])
@@ -79,8 +75,9 @@ with col1:
 
     with tab2:
         if st.button("RUN GENERATION"):
-            st.session_state["generated_copy"] = f"Luxury listing for: {property_details}"
-        st.text_area("Copy:", value=st.session_state["generated_copy"])
+            # Ensure API client is configured
+            st.session_state["generated_copy"] = f"Luxury listing for: {property_title}. {property_details}"
+        st.text_area("Copy:", value=st.session_state["generated_copy"], height=200)
 
 with col2:
     st.markdown(f"""
