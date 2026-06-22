@@ -15,6 +15,10 @@ st.set_page_config(
 api_key = st.secrets.get("GEMINI_API_KEY", "")
 client = genai.Client(api_key=api_key) if api_key else None
 
+# Initialize persistent memory block for text output
+if "generated_copy" not in st.session_state:
+    st.session_state["generated_copy"] = "Click 'Generate / Refresh Text Package' below to populate your workspace copy."
+
 # 2. SIDEBAR CONTROL PANEL
 with st.sidebar:
     st.markdown("### 🏢 BRANDING CONFIG")
@@ -35,7 +39,6 @@ with st.sidebar:
 
     st.markdown("---")
     st.markdown("### ⚙️ GENERATION MODE")
-    # Toggle between manual control and live AI control
     mode = st.radio("COPY ENGINE MODE:", ["Offline (Manual Input)", "Live AI Generation"])
     
     manual_caption = ""
@@ -62,7 +65,7 @@ with st.container(border=True):
         if st.button("Generate / Refresh Text Package", type="primary"):
             if mode == "Live AI Generation":
                 if not client:
-                    st.error("API Error: GEMINI_API_KEY secret is missing.")
+                    st.error("API Error: GEMINI_API_KEY secret is missing inside Streamlit Secrets.")
                 elif not property_details or not agency_name:
                     st.error("Error: Please provide values for Agency Name and Specifications first.")
                 else:
@@ -75,12 +78,10 @@ with st.container(border=True):
                             st.error(f"AI text model failed (Quota Exceeded): {str(e)}")
                             st.info("💡 Tip: Switch the Generation Mode in the sidebar to 'Offline' to manage your copy manually today.")
             else:
-                # Offline mode saves whatever you typed in the sidebar text box
                 st.session_state["generated_copy"] = manual_caption
 
-        # Display the text inside an adjustable area if it exists in memory
-        current_text = st.session_state.get("generated_copy", "Click 'Generate / Refresh Text Package' above to populate your workspace copy.")
-        st.text_area(label="Active Workspace Copy Block:", value=current_text, height=300)
+        # Display editable text area block
+        edited_text = st.text_area(label="Active Workspace Copy Block:", value=st.session_state["generated_copy"], height=300)
 
     with tab2:
         st.markdown("#### 🖨️ Production Asset Composite")
@@ -116,7 +117,7 @@ with st.container(border=True):
                 final_img = Image.alpha_composite(base_img, overlay).convert("RGB")
                 draw_final = ImageDraw.Draw(final_img)
                 
-                # Typography Stream From Google Fonts
+                # Typography Stream From Google Fonts (Montserrat Bold)
                 try:
                     font_url = "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat-Bold.ttf"
                     font_response = urllib.request.urlopen(font_url)
@@ -131,14 +132,14 @@ with st.container(border=True):
                     label_font = ImageFont.load_default()
                     agency_font = ImageFont.load_default()
                 
-                # Type Alignment Matrix
+                # Type Alignment Matrix (Centered Layout)
                 draw_final.text((600, poster_h - 370), property_title.upper(), fill=(255, 255, 255), anchor="mm", font=title_font)
                 if property_price:
                     draw_final.text((600, poster_h - 280), property_price.upper(), fill=(212, 175, 55), anchor="mm", font=price_font)
                 draw_final.text((600, poster_h - 175), "EXCLUSIVELY MARKETED BY:", fill=(148, 163, 184), anchor="mm", font=label_font)
                 draw_final.text((600, poster_h - 110), agency_name.upper(), fill=(255, 255, 255), anchor="mm", font=agency_font)
                 
-                # Render Graphic inside the UI
+                # Render Graphic inside the UI layout window
                 st.image(final_img, caption="Live Layout Core Preview", use_container_width=True)
                 
                 # Export image stream compiler
@@ -155,4 +156,4 @@ with st.container(border=True):
             except Exception as render_err:
                 st.error(f"Render System Notice: {str(render_err)}")
         else:
-            st.info("💡 Drop a raw listing image file directly into the sidebar Asset Manager panel to test your graphic layouts live.")
+            st.info("💡 Drop a raw listing image file directly into the sidebar Asset Manager panel to generate your typographic frame layouts live.")
