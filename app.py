@@ -28,32 +28,32 @@ def create_poster(image_file, agency, title, price):
     base_img = Image.open(image_file).convert("RGBA")
     poster_w, poster_h = 1200, 1500
     
-    # Crop and Resize Layout to Aspect Ratio
+    # Crop and Resize Layout using safe default scaling integers to prevent crashes
     img_ratio = base_img.width / base_img.height
     poster_ratio = poster_w / poster_h
     if img_ratio > poster_ratio:
         new_width = int(poster_h * img_ratio)
-        base_img = base_img.resize((new_width, poster_h), Image.Resampling.LANCZOS)
+        base_img = base_img.resize((new_width, poster_h), 3) # Safe integer for high-quality scaling
         left = (base_img.width - poster_w) / 2
         base_img = base_img.crop((left, 0, left + poster_w, poster_h))
     else:
         new_height = int(poster_w / img_ratio)
-        base_img = base_img.resize((poster_w, new_height), Image.Resampling.LANCZOS)
+        base_img = base_img.resize((poster_w, new_height), 3) # Safe integer for high-quality scaling
         top = (base_img.height - poster_h) / 2
         base_img = base_img.crop((0, top, poster_w, top + poster_h))
 
     overlay = Image.new("RGBA", (poster_w, poster_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(overlay)
     
-    # Translucent Dark Bottom Card
+    # Translucent Dark Bottom Card Banner
     draw.rectangle([(0, poster_h - 480), (poster_w, poster_h)], fill=(11, 17, 30, 240))
-    # Elegant Gold Line Accent
+    # Elegant Gold Line Accent Separator
     draw.rectangle([(0, poster_h - 486), (poster_w, poster_h - 480)], fill=(212, 175, 55, 255))
     
     final_img = Image.alpha_composite(base_img, overlay).convert("RGB")
     draw_final = ImageDraw.Draw(final_img)
     
-    # Download clean modern typography
+    # Download clean modern geometry fonts dynamically
     try:
         font_url = "https://github.com/google/fonts/raw/main/ofl/montserrat/Montserrat-Bold.ttf"
         font_response = urllib.request.urlopen(font_url)
@@ -68,7 +68,7 @@ def create_poster(image_file, agency, title, price):
         label_font = ImageFont.load_default()
         agency_font = ImageFont.load_default()
     
-    # Draw Typography elements
+    # Draw Premium Typography
     draw_final.text((600, poster_h - 360), title.upper(), fill=(255, 255, 255), anchor="mm", font=title_font)
     if price:
         draw_final.text((600, poster_h - 270), price.upper(), fill=(212, 175, 55), anchor="mm", font=price_font)
@@ -95,22 +95,3 @@ with col2:
                     st.error("AI Generation Error: " + str(e))
             
             if uploaded_file is not None:
-                with st.spinner("Compiling luxury marketing poster..."):
-                    try:
-                        poster = create_poster(uploaded_file, agency_name, property_title, property_price)
-                        st.image(poster, caption="Your New Marketing Poster", use_container_width=True)
-                        
-                        buf = io.BytesIO()
-                        poster.save(buf, format="JPEG", quality=95)
-                        byte_im = buf.getvalue()
-                        
-                        st.download_button(
-                            label="📥 Download High-Res Poster",
-                            data=byte_im,
-                            file_name="property_marketing_poster.jpg",
-                            mime="image/jpeg"
-                        )
-                    except Exception as e:
-                        st.error("Poster compilation error: " + str(e))
-            else:
-                st.info("💡 Tip: Upload an image in the left panel to output your visual poster alongside the copy.")
