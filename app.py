@@ -89,4 +89,4 @@ with st.sidebar:
     st.markdown("<p style='color: #94A3B8; font-size: 12px; margin-top: 0px;'>Set up corporate branding metadata</p>", unsafe_allow_html=True)
     agency_name = st.text_input("AGENCY NAME:", value="Apex Global Realty")
     
-    st.markdown("<br><h2 style='color: #
+    st.markdown("<br
